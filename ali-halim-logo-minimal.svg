@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 80" role="img" aria-label="Ali Halim GIS Specialist logo">
+<rect width="220" height="80" rx="18" fill="#07141d"/>
+<path d="M28 56 L42 24 L56 56" fill="none" stroke="#35d3b2" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M36 45 H48" stroke="#e9c36d" stroke-width="5" stroke-linecap="round"/>
+<path d="M68 25 V56 M68 41 H103 M103 25 V56" fill="none" stroke="#f4f8f8" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+<circle cx="108" cy="22" r="3.5" fill="#35d3b2"/>
+<text x="123" y="38" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="18" fill="#f4f8f8" letter-spacing="1.4">ALI HALIM</text>
+<text x="123" y="56" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="9" fill="#e9c36d" letter-spacing="2.6">GIS SPECIALIST</text>
+</svg>

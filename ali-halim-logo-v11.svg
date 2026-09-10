@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 520 150" role="img" aria-label="Ali Halim GIS Specialist logo">
+  <defs>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F4D47A"/>
+      <stop offset="0.45" stop-color="#D7A93A"/>
+      <stop offset="1" stop-color="#A87818"/>
+    </linearGradient>
+    <linearGradient id="navy" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#183C5B"/>
+      <stop offset="1" stop-color="#061522"/>
+    </linearGradient>
+    <clipPath id="globeClip"><circle cx="80" cy="52" r="31"/></clipPath>
+  </defs>
+  <rect width="520" height="150" fill="none"/>
+  <!-- clean AH monogram -->
+  <path d="M15 100 L48 18 L80 100 M30 66 H66" fill="none" stroke="url(#gold)" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M88 18 V100 M88 60 H124 M124 18 V100" fill="none" stroke="url(#navy)" stroke-width="9" stroke-linecap="round"/>
+  <!-- globe -->
+  <circle cx="80" cy="52" r="31" fill="url(#navy)" stroke="url(#gold)" stroke-width="2.5"/>
+  <g clip-path="url(#globeClip)" fill="none" stroke="#F4D47A" stroke-width="1.3" opacity="0.85">
+    <ellipse cx="80" cy="52" rx="15" ry="31"/><ellipse cx="80" cy="52" rx="5" ry="31"/>
+    <path d="M49 43 Q80 30 111 43 M49 61 Q80 74 111 61"/>
+    <path d="M80 20 V84"/>
+  </g>
+  <!-- orbit -->
+  <path d="M8 84 C44 118 126 119 154 78 C169 57 148 25 118 18" fill="none" stroke="url(#gold)" stroke-width="4.5" stroke-linecap="round"/>
+  <circle cx="151" cy="79" r="4.5" fill="#F4D47A"/>
+  <!-- wordmark -->
+  <text x="180" y="67" font-family="Arial, Helvetica, sans-serif" font-size="43" font-weight="800" letter-spacing="3" fill="#F4F7F8">ALI</text>
+  <text x="270" y="67" font-family="Arial, Helvetica, sans-serif" font-size="43" font-weight="800" letter-spacing="3" fill="#35D3B2">HALIM</text>
+  <line x1="182" y1="83" x2="486" y2="83" stroke="#284554" stroke-width="1.4"/>
+  <text x="183" y="108" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="800" letter-spacing="6" fill="#F4D47A">GIS SPECIALIST</text>
+</svg>
