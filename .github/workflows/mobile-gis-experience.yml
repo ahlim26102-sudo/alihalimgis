@@ -1,61 +1,83 @@
 name: Upgrade mobile GIS experience
+
 on:
   push:
     paths:
-      - .github/workflows/mobile-gis-experience.yml
+      - '.github/workflows/mobile-gis-experience.yml'
+
 permissions:
   contents: write
+
 jobs:
-  patch:
+  patch-mobile:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Add mobile GIS motion layer
-        shell: python
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Patch mobile CSS
         run: |
+          python - <<'PY'
           from pathlib import Path
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          css = r'''
-/* MOBILE GIS EXPERIENCE UPGRADE */
+          marker = '/* MOBILE GIS EXPERIENCE UPGRADE V2 */'
+          css = '''
+/* MOBILE GIS EXPERIENCE UPGRADE V2 */
 @media (max-width:650px){
-  .hero{position:relative;isolation:isolate;overflow:hidden}
-  .hero::before{content:"";position:absolute;z-index:-1;right:-48px;top:145px;width:205px;height:205px;border-radius:50%;background:radial-gradient(circle at 34% 30%,rgba(56,214,183,.30),rgba(7,61,69,.20) 42%,rgba(2,12,17,0) 72%);box-shadow:inset -22px -20px 45px rgba(0,0,0,.42),0 0 55px rgba(56,214,183,.10);animation:mobileEarthFloat 7s ease-in-out infinite}
-  .hero::after{content:"";position:absolute;z-index:-1;right:-64px;top:123px;width:236px;height:150px;border:1px solid rgba(232,198,111,.36);border-radius:50%;transform:rotate(-18deg);box-shadow:0 0 26px rgba(56,214,183,.08);animation:mobileOrbit 8s linear infinite}
-  .heroGrid::before{content:"";position:absolute;z-index:-1;right:25px;top:196px;width:148px;height:1px;background:linear-gradient(90deg,transparent,rgba(56,214,183,.75),transparent);box-shadow:0 0 12px rgba(56,214,183,.42);animation:mobileScan 4.2s ease-in-out infinite}
-  .heroGrid::after{content:"31.26°N   29.99°E   |   UTM   |   GIS DATA";position:absolute;right:12px;top:164px;font:700 7px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;color:rgba(157,201,208,.52);white-space:nowrap;animation:mobileTelemetry 5s ease-in-out infinite}
-  .hero .chips{position:relative}
-  .hero .chip{animation:mobileChip 4s ease-in-out infinite;animation-delay:calc(var(--i,0) * .16s)}
-  .hero .stats .stat{animation:mobileLift 5s ease-in-out infinite}
-  .hero .stats .stat:nth-child(2){animation-delay:.18s}.hero .stats .stat:nth-child(3){animation-delay:.36s}.hero .stats .stat:nth-child(4){animation-delay:.54s}
-  .hero .primary{box-shadow:0 0 0 0 rgba(56,214,183,.24);animation:mobileButtonPulse 3.2s ease-in-out infinite}
-  .services,.gallery,.layouts{display:flex!important;overflow-x:auto!important;overflow-y:hidden!important;gap:12px!important;padding:3px 4px 13px!important;scroll-snap-type:x mandatory!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
+  body{overflow-x:hidden}
+  .hero{min-height:720px!important;padding:54px 0 42px!important;position:relative;isolation:isolate}
+  .heroGrid{display:block!important;position:relative}
+  .heroGrid>div:first-child{position:relative;z-index:3}
+  .hero h1{font-size:clamp(54px,17vw,78px)!important;line-height:.88!important;letter-spacing:-.07em!important;margin:10px 0 14px!important}
+  .headline{font-size:21px!important;max-width:92%!important}
+  .lead{font-size:14px!important;max-width:94%!important}
+  .hero .chips{gap:6px!important;margin:15px 0!important;max-width:94%}
+  .hero .chip{font-size:9px!important;padding:6px 8px!important}
+  .hero .stats{grid-template-columns:repeat(2,1fr)!important;gap:7px!important;max-width:94%}
+  .hero .stat{padding:12px!important;border-radius:13px!important}
+  .hero .stat b{font-size:20px!important}
+  .hero .btn{padding:11px 13px!important;font-size:11px!important}
+  .hero .globeBox{display:block!important;min-height:290px!important;margin-top:26px!important;border-radius:25px!important;transform:none!important}
+  .hero .globe{width:180px!important;height:180px!important;top:49%!important}
+  .hero .orb{width:250px!important;height:70px!important}
+  .hero .orb2{width:285px!important;height:88px!important}
+  .hero .profileBadge{left:10px!important;right:10px!important;bottom:10px!important}
+  .hero::before{content:"";position:absolute;z-index:-1;right:-32px;top:184px;width:210px;height:210px;border-radius:50%;background:radial-gradient(circle at 35% 30%,rgba(56,214,183,.34),rgba(7,63,70,.18) 45%,transparent 72%);box-shadow:inset -24px -22px 48px rgba(0,0,0,.48),0 0 60px rgba(56,214,183,.10);animation:mEarth 7s ease-in-out infinite}
+  .hero::after{content:"";position:absolute;z-index:-1;right:-48px;top:164px;width:245px;height:154px;border:1px solid rgba(232,198,111,.38);border-radius:50%;transform:rotate(-18deg);animation:mOrbit 8s linear infinite}
+  .heroGrid::before{content:"";position:absolute;z-index:-1;right:25px;top:226px;width:142px;height:1px;background:linear-gradient(90deg,transparent,rgba(56,214,183,.9),transparent);box-shadow:0 0 14px rgba(56,214,183,.5);animation:mScan 4s ease-in-out infinite}
+  .heroGrid::after{content:"31.26°N 29.99°E   •   UTM   •   LIVE GIS";position:absolute;right:10px;top:202px;font:700 7px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;color:rgba(157,201,208,.64);white-space:nowrap;animation:mTelem 4.8s ease-in-out infinite}
+  .services,.gallery,.layouts{display:flex!important;overflow-x:auto!important;overflow-y:hidden!important;gap:12px!important;padding:4px 4px 14px!important;scroll-snap-type:x mandatory!important;scrollbar-width:none!important}
   .services::-webkit-scrollbar,.gallery::-webkit-scrollbar,.layouts::-webkit-scrollbar{display:none!important}
-  .services>.card,.gallery>.tile,.layouts>.layout{flex:0 0 86vw!important;max-width:86vw!important;scroll-snap-align:start!important}
+  .services>.card,.gallery>.tile,.layouts>.layout{flex:0 0 88vw!important;width:88vw!important;max-width:88vw!important;scroll-snap-align:start!important}
   .services>.card{min-height:205px!important}
-  .gallery>.tile img{aspect-ratio:16/11!important}
-  .layouts>.layout{min-height:auto!important}
-  .layouts .pdfPreview{height:265px!important}
-  .section{overflow:hidden}
-  .head h2{letter-spacing:-.035em}
+  .gallery>.tile img{aspect-ratio:16/10!important}
+  .layouts .pdfPreview{height:300px!important}
+  .head{display:block!important;margin-bottom:18px!important}
+  .head h2{font-size:30px!important}
+  .head p{font-size:12px!important}
 }
-@keyframes mobileEarthFloat{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-6px,-8px,0) scale(1.035)}}
-@keyframes mobileOrbit{to{transform:rotate(342deg)}}
-@keyframes mobileScan{0%,100%{transform:translateY(0);opacity:.15}50%{transform:translateY(110px);opacity:1}}
-@keyframes mobileTelemetry{0%,100%{opacity:.28;transform:translateY(0)}50%{opacity:.8;transform:translateY(5px)}}
-@keyframes mobileChip{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
-@keyframes mobileLift{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
-@keyframes mobileButtonPulse{0%,100%{box-shadow:0 0 0 0 rgba(56,214,183,0)}50%{box-shadow:0 0 0 7px rgba(56,214,183,.08)}}
-@media (prefers-reduced-motion:reduce){.hero::before,.hero::after,.heroGrid::before,.heroGrid::after,.hero .chip,.hero .stats .stat,.hero .primary{animation:none!important}}
+@keyframes mEarth{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-7px,-8px,0) scale(1.04)}}
+@keyframes mOrbit{to{transform:rotate(342deg)}}
+@keyframes mScan{0%,100%{transform:translateY(0);opacity:.12}50%{transform:translateY(125px);opacity:1}}
+@keyframes mTelem{0%,100%{opacity:.22;transform:translateY(0)}50%{opacity:.82;transform:translateY(5px)}}
+@media (prefers-reduced-motion:reduce){.hero::before,.hero::after,.heroGrid::before,.heroGrid::after{animation:none!important}}
 '''
-          if '/* MOBILE GIS EXPERIENCE UPGRADE */' not in s:
+          if marker not in s:
               s = s.replace('</style>', css + '\n</style>', 1)
-          p.write_text(s, encoding='utf-8')
-      - name: Commit and push
+              p.write_text(s, encoding='utf-8')
+          PY
+
+      - name: Commit mobile upgrade
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add index.html
-          git diff --cached --quiet && exit 0
-          git commit -m "Add premium mobile GIS motion and snap galleries"
-          git push
+          if git diff --cached --quiet; then
+            echo 'No mobile changes to commit.'
+            exit 0
+          fi
+          git commit -m 'Improve premium mobile GIS experience'
+          git push origin HEAD:main
