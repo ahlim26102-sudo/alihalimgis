@@ -1,0 +1,36 @@
+name: Fix animated GIS annotation stacking
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-annotation-layer.yml'
+permissions:
+  contents: write
+jobs:
+  fix-layer:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fix annotation layer stacking
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          s = s.replace('.gisAnnotation{position:fixed;inset:0;z-index:-2;', '.gisAnnotation{position:fixed;inset:0;z-index:0;', 1)
+          marker = '/* ANNOTATION STACKING FIX V1 */'
+          if marker not in s:
+              fix = r'''
+          /* ANNOTATION STACKING FIX V1 */
+          body>header,body>main,body>footer{position:relative;z-index:1}
+          .gisAnnotation{mix-blend-mode:screen;}
+          '''
+              s = s.replace('</style>', fix + '\n</style>', 1)
+          p.write_text(s, encoding='utf-8')
+      - name: Commit and push
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Fix animated GIS annotation stacking'
+          git push origin HEAD:main
