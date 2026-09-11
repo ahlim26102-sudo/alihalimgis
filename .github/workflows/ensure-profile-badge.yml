@@ -1,0 +1,39 @@
+name: Ensure premium profile badge
+on:
+  push:
+    paths:
+      - .github/workflows/ensure-profile-badge.yml
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add professional portrait badge
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          # Normalize portrait source to the repository-local file.
+          s=s.replace('https://raw.githubusercontent.com/ahlim26102-sudo/alihalimgis/main/ali-halim-portrait-original-cutout.png','ali-halim-portrait-original-cutout.png')
+          # Remove prior badge markup so it cannot duplicate.
+          s=re.sub(r'<div class="profileBadge">.*?</div></div></div>', '', s, flags=re.S)
+          badge='''<div class="profileBadge"><div class="badgePhoto"><img src="ali-halim-portrait-original-cutout.png" alt="Ali Halim"></div><div class="badgeCopy"><span class="badgeKicker">PROFESSIONAL PROFILE</span><strong>ALI HALIM</strong><span class="badgeRole"><i></i>GIS SPECIALIST</span><small>Utility GIS · CAD → GIS · Automation</small></div></div>'''
+          marker='<div class="globeBox reveal">'
+          if marker in s:
+              s=s.replace(marker, marker+badge, 1)
+          css='''<style id="premium-profile-badge">.globeBox{position:relative}.profileBadge{position:absolute!important;left:22px!important;bottom:20px!important;z-index:80!important;display:flex!important;align-items:center!important;gap:13px!important;min-width:285px!important;padding:11px 16px 11px 11px!important;border:1px solid rgba(232,198,111,.72)!important;border-radius:20px!important;background:rgba(4,16,23,.94)!important;box-shadow:0 18px 48px rgba(0,0,0,.45),inset 0 0 0 1px rgba(56,214,183,.09)!important;backdrop-filter:blur(16px)!important}.profileBadge .badgePhoto{width:86px!important;height:86px!important;flex:0 0 86px!important;border-radius:18px!important;overflow:hidden!important;border:1px solid rgba(232,198,111,.82)!important;background:linear-gradient(180deg,#0b2732,#06141b)!important;display:flex!important;align-items:flex-end!important;justify-content:center!important}.profileBadge .badgePhoto img{display:block!important;height:100%!important;width:auto!important;max-width:none!important;object-fit:contain!important;filter:drop-shadow(0 8px 12px rgba(0,0,0,.4))!important}.badgeCopy{display:flex!important;flex-direction:column!important;gap:2px!important}.badgeKicker{font-size:9px!important;letter-spacing:.18em!important;color:#e8c66f!important;font-weight:950!important}.badgeCopy strong{font-size:21px!important;letter-spacing:-.03em!important;line-height:1.05!important}.badgeRole{font-size:10px!important;color:#e8c66f!important;font-weight:900!important;letter-spacing:.13em!important}.badgeRole i{display:inline-block!important;width:7px!important;height:7px!important;border-radius:50%!important;background:#38d6b7!important;margin-right:6px!important;box-shadow:0 0 0 5px rgba(56,214,183,.08)!important;vertical-align:middle!important}.badgeCopy small{font-size:9px!important;color:#a2b8c0!important;margin-top:2px!important}@media(max-width:680px){.profileBadge{left:14px!important;right:14px!important;bottom:14px!important;min-width:0!important}.profileBadge .badgePhoto{width:64px!important;height:64px!important;flex-basis:64px!important}.badgeCopy strong{font-size:17px!important}.badgeCopy small{font-size:8px!important}}</style>'''
+          if 'id="premium-profile-badge"' not in s:
+              s=s.replace('</head>',css+'</head>',1)
+          p.write_text(s,encoding='utf-8')
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Add premium profile portrait badge"
+          git push
