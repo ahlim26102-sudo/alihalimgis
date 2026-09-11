@@ -1,0 +1,37 @@
+name: Fix profile image
+on:
+  push:
+    paths:
+      - .github/workflows/fix-profile-image.yml
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Restore visible profile portrait
+        shell: python
+        run: |
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          old='https://raw.githubusercontent.com/ahlim26102-sudo/alihalimgis/main/ali-halim-portrait-original-cutout.png'
+          s=s.replace(old, 'ali-halim-portrait-original-cutout.png')
+          if 'class="profileBadge"' not in s:
+              badge='''<div class="profileBadge"><div class="profileBadgePhoto"><img src="ali-halim-portrait-original-cutout.png" alt="Ali Halim"></div><div class="profileBadgeMeta"><div class="name">ALI HALIM</div><div class="role"><span class="liveDot"></span>GIS SPECIALIST</div><div class="sub">Utility GIS · CAD → GIS · Automation</div></div></div>'''
+              marker='<div class="globeBox reveal">'
+              if marker in s:
+                  s=s.replace(marker, marker+badge, 1)
+          css='''.profileBadge{position:absolute;left:22px;bottom:22px;z-index:30;display:flex;align-items:center;gap:12px;padding:10px 14px 10px 10px;border:1px solid rgba(53,211,178,.42);border-radius:18px;background:rgba(5,18,24,.92);backdrop-filter:blur(14px);box-shadow:0 16px 42px rgba(0,0,0,.42);animation:badgeFloat 5.5s ease-in-out infinite}.profileBadgePhoto{width:72px;height:72px;flex:0 0 72px;border-radius:15px;overflow:hidden;border:1px solid rgba(232,196,110,.8);background:#07151d;display:flex;align-items:flex-end;justify-content:center}.profileBadgePhoto img{height:100%;width:auto;object-fit:contain;display:block}.profileBadgeMeta{min-width:150px}.profileBadgeMeta .name{font-size:19px;font-weight:950;letter-spacing:-.02em}.profileBadgeMeta .role{font-size:10px;color:#e8c46e;font-weight:900;letter-spacing:.14em;text-transform:uppercase}.profileBadgeMeta .sub{font-size:10px;color:#9db4bd;margin-top:3px}.liveDot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#35d3b2;margin-right:6px;vertical-align:middle;animation:badgePulse 1.8s ease-in-out infinite}@keyframes badgeFloat{50%{transform:translateY(-5px)}}@keyframes badgePulse{50%{box-shadow:0 0 0 8px rgba(53,211,178,.05)}}'''
+          if '.profileBadge{position:absolute' not in s:
+              s=s.replace('</style>', css+'</style>', 1)
+          p.write_text(s,encoding='utf-8')
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Fix profile portrait rendering"
+          git push
