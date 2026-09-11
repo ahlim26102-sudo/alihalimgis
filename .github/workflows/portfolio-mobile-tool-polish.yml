@@ -1,0 +1,72 @@
+name: Portfolio mobile and tool polish
+on:
+  push:
+    paths:
+      - .github/workflows/portfolio-mobile-tool-polish.yml
+permissions:
+  contents: write
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch portfolio
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          patch = r'''
+          /* MOBILE + TOUCH POLISH */
+          *{min-width:0}
+          html,body{width:100%;max-width:100%;overflow-x:hidden}
+          button,a{touch-action:manipulation}
+          .media img,.tile img,.toolImage img,.portrait img{max-width:100%}
+          .toolImage img{object-position:center center}
+          @media(max-width:980px){
+            .heroGrid{display:grid;grid-template-columns:1fr;gap:22px}
+            .profile{order:2}.earth{order:3;min-height:350px}
+            .hero{padding-bottom:46px}
+          }
+          @media(max-width:650px){
+            .wrap{width:calc(100% - 28px);max-width:none}
+            .nav{height:62px}.brand img{width:145px;height:44px}
+            .hero{padding:32px 0 42px}.hero h1{font-size:clamp(48px,16vw,70px);word-break:keep-all}
+            .headline{font-size:19px;line-height:1.3}.lead{font-size:13px;line-height:1.65}
+            .chips{gap:6px}.chip{font-size:9px;padding:6px 8px}
+            .actions{display:grid;grid-template-columns:1fr;gap:8px}.actions .btn{width:100%;margin:0}
+            .stats{grid-template-columns:1fr 1fr;gap:8px}.stat{padding:12px}.stat b{font-size:20px}
+            .profile{border-radius:22px;padding:14px}.profileTop{grid-template-columns:1fr!important;text-align:center;gap:8px}
+            .portrait{height:205px}.profile h2{font-size:25px}.profile p{font-size:11px}.sig{font-size:20px;margin-top:13px}
+            .profileBadge{margin-top:12px;padding:10px;border-radius:14px;text-align:left;align-items:flex-start}
+            .badgeText b{font-size:11px}.badgeText span{font-size:8px;line-height:1.45}
+            .earth{min-height:300px;border-radius:20px}.earthCore{width:190px;height:190px}.orbit{width:265px;height:70px}.orbit.alt{width:300px;height:92px}
+            .coord{font-size:7px}.earthCaption{left:13px;bottom:12px;font-size:8px}.scan{left:6%;right:6%}
+            .section{padding:52px 0}.head{margin-bottom:18px}.head h2{font-size:27px;line-height:1.15}.head p{font-size:11px}
+            .card{border-radius:18px;padding:15px}.grid2,.case,.toolGrid{grid-template-columns:1fr!important}.services,.gallery,.layouts{grid-template-columns:1fr!important}
+            .service{min-height:0}.service p{font-size:11px}.toolSpecs{grid-template-columns:1fr!important}
+            .layout iframe{display:none!important}.layout{min-height:0}.layout .body{padding:14px}.layout .pdf{font-size:9px}
+            .stack{grid-template-columns:1fr 1fr!important}.tech{padding:12px}.tech b{font-size:10px}.tech span{font-size:8px}
+            .timeline{padding:18px 16px 6px 34px}.timeline:before{left:8px}.job:before{left:-30px}.job h4{font-size:13px}.job p{font-size:10px}.contact{grid-template-columns:1fr!important}
+            footer{font-size:8px;line-height:1.5}.mobileNav a{font-size:11px}
+          }
+          @media(max-width:390px){.stats{grid-template-columns:1fr}.stack{grid-template-columns:1fr!important}.earth{min-height:275px}.earthCore{width:170px;height:170px}.orbit{width:235px}.orbit.alt{width:270px}.coord{display:none}}
+          @media(prefers-reduced-motion:reduce){.reveal{opacity:1!important;transform:none!important}.earth *{animation:none!important}}
+          '''
+          if '/* MOBILE + TOUCH POLISH */' not in s:
+              s = s.replace('</style>', patch + '\n</style>', 1)
+          # Make the GEO ORBIT section unambiguous and recruiter-friendly.
+          s = s.replace('Desktop GIS conversion & survey workflow tool.', 'Desktop GIS conversion & survey workflow tool — developed by Ali Halim.')
+          s = s.replace('DOWNLOAD LINK — COMING SOON', 'DOWNLOAD LINK — TO BE ADDED')
+          # Mark portfolio imagery lazy-loaded without touching layout behavior.
+          s = re.sub(r'<img(?![^>]*loading=)(?![^>]*alt="Ali Halim professional portrait")', '<img loading="lazy"', s)
+          p.write_text(s, encoding='utf-8')
+      - name: Commit patch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Polish mobile layout and GEO ORBIT showcase"
+          git push
