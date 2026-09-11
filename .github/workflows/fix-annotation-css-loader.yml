@@ -1,0 +1,59 @@
+name: Fix animated GIS annotation visibility
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-annotation-css-loader.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Inject annotation CSS into runtime loader
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = '/* RUNTIME ANNOTATION CSS V2 */'
+          if marker not in s:
+              css = r'''\n/* RUNTIME ANNOTATION CSS V2 */
+.gisAnnotation{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;display:block;opacity:.86;mix-blend-mode:screen}
+.gisAnnotation:before{content:"";position:absolute;left:-8vw;top:10vh;width:44vw;height:44vw;max-width:620px;max-height:620px;border:1px solid rgba(66,223,191,.18);border-radius:50%;box-shadow:0 0 90px rgba(66,223,191,.08),inset 0 0 70px rgba(66,223,191,.035);animation:gisOrbitA 18s linear infinite}
+.gisAnnotation:after{content:"";position:absolute;right:-10vw;bottom:3vh;width:34vw;height:34vw;max-width:480px;max-height:480px;border:1px solid rgba(233,198,111,.14);border-radius:50%;box-shadow:0 0 70px rgba(233,198,111,.05);animation:gisOrbitB 24s linear infinite reverse}
+.gisAnnotation .route{position:absolute;left:0;right:0;top:33%;height:1px;background:linear-gradient(90deg,transparent,rgba(66,223,191,.08) 12%,rgba(66,223,191,.5) 50%,rgba(233,198,111,.18) 72%,transparent);transform:rotate(-9deg);box-shadow:0 0 18px rgba(66,223,191,.12);animation:gisSweep 7s ease-in-out infinite}
+.gisAnnotation .route.r2{top:64%;transform:rotate(7deg);opacity:.6;animation-delay:1.7s}
+.gisAnnotation .node{position:absolute;width:7px;height:7px;border-radius:50%;background:#42dfbf;box-shadow:0 0 0 4px rgba(66,223,191,.08),0 0 18px rgba(66,223,191,.35);animation:gisPulse 3.6s ease-in-out infinite}
+.gisAnnotation .node.g{background:#e9c66f;box-shadow:0 0 0 4px rgba(233,198,111,.08),0 0 18px rgba(233,198,111,.32)}
+.gisAnnotation .n1{left:11%;top:22%}.gisAnnotation .n2{left:29%;top:37%;animation-delay:.7s}.gisAnnotation .n3{right:24%;top:27%;animation-delay:1.4s}.gisAnnotation .n4{right:12%;top:58%;animation-delay:2.1s}.gisAnnotation .n5{left:18%;bottom:18%;animation-delay:.9s}.gisAnnotation .n6{right:34%;bottom:12%;animation-delay:1.7s}
+.gisAnnotation .label{position:absolute;font:700 7px/1.3 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.14em;color:rgba(157,201,208,.42);text-transform:uppercase;white-space:nowrap;animation:gisLabel 6s ease-in-out infinite;text-shadow:0 0 12px rgba(66,223,191,.16)}
+.gisAnnotation .l1{left:13%;top:19%}.gisAnnotation .l2{right:16%;top:24%;animation-delay:1.2s}.gisAnnotation .l3{left:22%;bottom:22%;animation-delay:2.4s}.gisAnnotation .l4{right:28%;bottom:16%;animation-delay:3.1s}
+.gisAnnotation .cross{position:absolute;width:12px;height:12px;opacity:.32}.gisAnnotation .cross:before,.gisAnnotation .cross:after{content:"";position:absolute;background:rgba(66,223,191,.45)}.gisAnnotation .cross:before{left:5px;top:0;width:1px;height:12px}.gisAnnotation .cross:after{left:0;top:5px;width:12px;height:1px}
+.gisAnnotation .c1{left:37%;top:18%}.gisAnnotation .c2{right:38%;top:72%}.gisAnnotation .c3{right:9%;bottom:25%}
+body>header,body>main,body>footer{position:relative;z-index:1}
+@keyframes gisOrbitA{to{transform:rotate(360deg)}}
+@keyframes gisOrbitB{to{transform:rotate(-360deg)}}
+@keyframes gisSweep{0%,100%{opacity:.28;transform:translateX(-4%) rotate(-9deg)}50%{opacity:1;transform:translateX(4%) rotate(-9deg)}}
+@keyframes gisPulse{0%,100%{transform:scale(.75);opacity:.3}50%{transform:scale(1.7);opacity:1}}
+@keyframes gisLabel{0%,100%{opacity:.2;transform:translateY(0)}50%{opacity:.62;transform:translateY(-4px)}}
+@media(max-width:680px){.gisAnnotation{opacity:.68}.gisAnnotation:before{width:74vw;height:74vw;left:-28vw;top:22vh}.gisAnnotation:after{width:58vw;height:58vw;right:-27vw;bottom:12vh}.gisAnnotation .label{font-size:6px}}
+@media(prefers-reduced-motion:reduce){.gisAnnotation:before,.gisAnnotation:after,.gisAnnotation .route,.gisAnnotation .node,.gisAnnotation .label{animation:none!important}}
+'''
+              target = "</style>';document.body.innerHTML=doc.body.innerHTML;"
+              if target not in s:
+                  raise SystemExit('runtime style close marker not found')
+              s = s.replace(target, css + "\n</style>';document.body.innerHTML=doc.body.innerHTML;", 1)
+              p.write_text(s, encoding='utf-8')
+          else:
+              print('Annotation runtime CSS already present')
+      - name: Commit patch and remove workflow
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Fix animated GIS annotation runtime CSS' || true
+          git rm .github/workflows/fix-annotation-css-loader.yml || true
+          git commit -m 'Remove one-time annotation fix workflow' || true
+          git push origin HEAD:main
