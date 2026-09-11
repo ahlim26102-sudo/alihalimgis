@@ -1,0 +1,54 @@
+name: Premium portfolio upgrade
+on:
+  push:
+    paths:
+      - .github/workflows/premium-portfolio-upgrade.yml
+permissions:
+  contents: write
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Upgrade portfolio
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          css=r'''
+          /* PREMIUM GIS MOTION */
+          #motion{position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden;background:radial-gradient(circle at 78% 16%,rgba(54,214,182,.08),transparent 20%)}
+          #motion .earth{position:absolute;right:-90px;top:120px;width:min(44vw,620px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 34% 30%,rgba(62,205,191,.28),rgba(5,39,48,.22) 42%,rgba(0,10,14,.05) 70%);box-shadow:inset -48px -30px 90px rgba(0,0,0,.42),0 0 90px rgba(54,214,182,.09)}
+          #motion .earth:before{content:"";position:absolute;inset:11%;border:1px solid rgba(232,198,110,.18);border-radius:50%;box-shadow:0 -92px 0 -91px rgba(255,255,255,.12),0 92px 0 -91px rgba(255,255,255,.12)}
+          #motion .earth:after{content:"";position:absolute;inset:6% 26%;border-left:1px solid rgba(255,255,255,.12);border-right:1px solid rgba(255,255,255,.12);border-radius:50%;transform:skewX(-18deg);animation:earthSpin 28s linear infinite}
+          #motion .ring{position:absolute;inset:-4%;border:1px solid rgba(54,214,182,.2);border-radius:50%;transform:rotate(18deg);animation:orbit 24s linear infinite}
+          #motion .ring.r2{inset:9% -5%;transform:rotate(62deg);animation-duration:38s;animation-direction:reverse;border-color:rgba(232,198,110,.13)}
+          #motion .beam{position:absolute;left:7%;right:7%;top:18%;height:1px;background:linear-gradient(90deg,transparent,rgba(54,214,182,.55),transparent);animation:beam 5s ease-in-out infinite}
+          #motion .dot{position:absolute;width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 15px rgba(54,214,182,.7);animation:dotPulse 2.1s infinite}.d1{right:26%;top:30%}.d2{right:13%;top:47%;animation-delay:.6s}.d3{right:31%;top:62%;animation-delay:1.2s}.d4{right:17%;top:73%;animation-delay:1.8s}
+          @keyframes orbit{to{transform:rotate(378deg)}}@keyframes earthSpin{to{transform:skewX(-18deg) rotateY(360deg)}}@keyframes beam{50%{transform:translateY(300px)}100%{transform:none}}@keyframes dotPulse{70%{box-shadow:0 0 0 10px rgba(54,214,182,0)}}
+          .premiumBanner{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:22px}.premiumTile{padding:18px;border:1px solid var(--line);border-radius:20px;background:linear-gradient(145deg,#0c2430,#081820);position:relative;overflow:hidden}.premiumTile:after{content:"";position:absolute;width:120px;height:120px;border:1px solid rgba(54,214,182,.1);border-radius:50%;right:-35px;bottom:-40px;animation:float 6s ease-in-out infinite}.premiumTile b{font-size:17px}.premiumTile span{display:block;color:var(--mut);font-size:11px;margin-top:5px}.premiumTile .miniLine{height:3px;background:linear-gradient(90deg,var(--teal),transparent);margin-top:13px;border-radius:9px}.signalSection{padding:78px 0}.signalBoard{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.signalMap{min-height:290px;position:relative;overflow:hidden}.signalMap:before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(54,214,182,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(54,214,182,.05) 1px,transparent 1px);background-size:31px 31px}.signalMap svg{position:absolute;inset:7%;width:86%;height:86%}.signalMap .sweep{position:absolute;top:0;bottom:0;left:0;width:2px;background:linear-gradient(180deg,transparent,var(--gold),transparent);animation:sweepX 5s linear infinite}.signalList{display:grid;grid-template-columns:1fr 1fr;gap:10px}.signalItem{padding:15px;border:1px solid var(--line);border-radius:15px;background:#091b24}.signalItem b{display:block;font-size:11px}.signalItem span{display:block;color:var(--mut);font-size:10px;margin-top:4px}.signalItem i{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--teal);margin-right:6px;box-shadow:0 0 12px rgba(54,214,182,.5)}@keyframes sweepX{to{left:100%}}
+          .layout{box-shadow:0 12px 35px rgba(0,0,0,.12)}.layout:hover{transform:translateY(-6px) scale(1.01)}.tile,.service,.card{transition:transform .25s ease,border-color .25s ease,box-shadow .25s ease}.service:hover,.tile:hover,.card:hover{border-color:#3d7481;box-shadow:0 20px 46px rgba(0,0,0,.18)}
+          @media(max-width:900px){#motion .earth{right:-180px;width:560px;opacity:.32}.premiumBanner,.signalBoard{grid-template-columns:1fr}.signalList{grid-template-columns:1fr 1fr}}@media(max-width:600px){#motion{display:none}.premiumBanner,.signalList{grid-template-columns:1fr}}
+          @media(prefers-reduced-motion:reduce){#motion *,.signalMap .sweep,.premiumTile:after{animation:none!important}}
+          '''
+          if '/* PREMIUM GIS MOTION */' not in s:
+              s=s.replace('</style>',css+'</style>',1)
+          if '<div id="motion">' not in s:
+              motion='<div id="motion"><div class="earth"></div><div class="ring"></div><div class="ring r2"></div><div class="beam"></div><span class="dot d1"></span><span class="dot d2"></span><span class="dot d3"></span><span class="dot d4"></span></div>'
+              s=s.replace('<body>', '<body>'+motion,1)
+          premium='''<section class="section alt" id="value"><div class="wrap reveal"><div class="head"><div><div class="ey">02 · VALUE</div><h2>More than map production.</h2></div><p>I connect engineering inputs, spatial data, quality control and automation into one delivery mindset.</p></div><div class="premiumBanner"><div class="premiumTile"><b>Engineering → GIS</b><span>Transform CAD, survey and utility inputs into structured spatial data.</span><div class="miniLine"></div></div><div class="premiumTile"><b>GIS → Delivery</b><span>Validate, visualize and package professional outputs for decision makers.</span><div class="miniLine"></div></div></div></div></section>'''
+          if 'id="value"' not in s:
+              s=s.replace('<section id="services"',premium+'<section id="services"',1)
+          if 'id="signals"' not in s:
+              signal='''<section class="signalSection" id="signals"><div class="wrap reveal"><div class="head"><div><div class="ey">03 · GIS SYSTEM VIEW</div><h2>A GIS workflow that behaves like a system.</h2></div><p>Every stage has a purpose: ingest, structure, validate and deliver.</p></div><div class="signalBoard"><div class="card signalMap"><div class="sweep"></div><svg viewBox="0 0 700 330"><path d="M20 260C120 225 110 125 215 160S315 292 410 190 520 62 670 98" fill="none" stroke="#36d6b6" stroke-width="4"/><path d="M55 82C150 130 250 68 335 128S495 250 660 232" fill="none" stroke="#e9c66e" stroke-width="2" stroke-dasharray="10 10"/><g fill="#f5f8fa"><circle cx="20" cy="260" r="7"/><circle cx="215" cy="160" r="7"/><circle cx="410" cy="190" r="7"/><circle cx="670" cy="98" r="7"/></g><g fill="#36d6b6"><circle cx="118" cy="219" r="5"/><circle cx="310" cy="173" r="5"/><circle cx="522" cy="120" r="5"/></g></svg></div><div class="signalList"><div class="signalItem"><b><i></i>01 · INGEST</b><span>CAD / survey / utility inputs</span></div><div class="signalItem"><b><i></i>02 · STRUCTURE</b><span>Geometry + attributes + database</span></div><div class="signalItem"><b><i></i>03 · QA/QC</b><span>Topology + validation + consistency</span></div><div class="signalItem"><b><i></i>04 · DELIVER</b><span>Maps + datasets + outputs</span></div></div></div></div></section>'''
+              s=s.replace('<section class="section alt" id="projects">',signal+'<section class="section alt" id="projects">',1)
+          s=s.replace('<a href="#services">SERVICES</a>', '<a href="#value">VALUE</a><a href="#services">SERVICES</a>',1)
+          s=s.replace('<a href="#automation">AUTOMATION</a>', '<a href="#toolbox">TOOLBOX</a><a href="#automation">AUTOMATION</a>',1)
+          p.write_text(s,encoding='utf-8')
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet || git commit -m "Premium GIS portfolio motion and positioning"
+          git push
