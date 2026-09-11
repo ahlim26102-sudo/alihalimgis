@@ -1,0 +1,61 @@
+name: Upgrade mobile GIS experience
+on:
+  push:
+    paths:
+      - .github/workflows/mobile-gis-experience.yml
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Add mobile GIS motion layer
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          css = r'''
+/* MOBILE GIS EXPERIENCE UPGRADE */
+@media (max-width:650px){
+  .hero{position:relative;isolation:isolate;overflow:hidden}
+  .hero::before{content:"";position:absolute;z-index:-1;right:-48px;top:145px;width:205px;height:205px;border-radius:50%;background:radial-gradient(circle at 34% 30%,rgba(56,214,183,.30),rgba(7,61,69,.20) 42%,rgba(2,12,17,0) 72%);box-shadow:inset -22px -20px 45px rgba(0,0,0,.42),0 0 55px rgba(56,214,183,.10);animation:mobileEarthFloat 7s ease-in-out infinite}
+  .hero::after{content:"";position:absolute;z-index:-1;right:-64px;top:123px;width:236px;height:150px;border:1px solid rgba(232,198,111,.36);border-radius:50%;transform:rotate(-18deg);box-shadow:0 0 26px rgba(56,214,183,.08);animation:mobileOrbit 8s linear infinite}
+  .heroGrid::before{content:"";position:absolute;z-index:-1;right:25px;top:196px;width:148px;height:1px;background:linear-gradient(90deg,transparent,rgba(56,214,183,.75),transparent);box-shadow:0 0 12px rgba(56,214,183,.42);animation:mobileScan 4.2s ease-in-out infinite}
+  .heroGrid::after{content:"31.26°N   29.99°E   |   UTM   |   GIS DATA";position:absolute;right:12px;top:164px;font:700 7px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.12em;color:rgba(157,201,208,.52);white-space:nowrap;animation:mobileTelemetry 5s ease-in-out infinite}
+  .hero .chips{position:relative}
+  .hero .chip{animation:mobileChip 4s ease-in-out infinite;animation-delay:calc(var(--i,0) * .16s)}
+  .hero .stats .stat{animation:mobileLift 5s ease-in-out infinite}
+  .hero .stats .stat:nth-child(2){animation-delay:.18s}.hero .stats .stat:nth-child(3){animation-delay:.36s}.hero .stats .stat:nth-child(4){animation-delay:.54s}
+  .hero .primary{box-shadow:0 0 0 0 rgba(56,214,183,.24);animation:mobileButtonPulse 3.2s ease-in-out infinite}
+  .services,.gallery,.layouts{display:flex!important;overflow-x:auto!important;overflow-y:hidden!important;gap:12px!important;padding:3px 4px 13px!important;scroll-snap-type:x mandatory!important;-webkit-overflow-scrolling:touch!important;scrollbar-width:none!important}
+  .services::-webkit-scrollbar,.gallery::-webkit-scrollbar,.layouts::-webkit-scrollbar{display:none!important}
+  .services>.card,.gallery>.tile,.layouts>.layout{flex:0 0 86vw!important;max-width:86vw!important;scroll-snap-align:start!important}
+  .services>.card{min-height:205px!important}
+  .gallery>.tile img{aspect-ratio:16/11!important}
+  .layouts>.layout{min-height:auto!important}
+  .layouts .pdfPreview{height:265px!important}
+  .section{overflow:hidden}
+  .head h2{letter-spacing:-.035em}
+}
+@keyframes mobileEarthFloat{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(-6px,-8px,0) scale(1.035)}}
+@keyframes mobileOrbit{to{transform:rotate(342deg)}}
+@keyframes mobileScan{0%,100%{transform:translateY(0);opacity:.15}50%{transform:translateY(110px);opacity:1}}
+@keyframes mobileTelemetry{0%,100%{opacity:.28;transform:translateY(0)}50%{opacity:.8;transform:translateY(5px)}}
+@keyframes mobileChip{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+@keyframes mobileLift{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@keyframes mobileButtonPulse{0%,100%{box-shadow:0 0 0 0 rgba(56,214,183,0)}50%{box-shadow:0 0 0 7px rgba(56,214,183,.08)}}
+@media (prefers-reduced-motion:reduce){.hero::before,.hero::after,.heroGrid::before,.heroGrid::after,.hero .chip,.hero .stats .stat,.hero .primary{animation:none!important}}
+'''
+          if '/* MOBILE GIS EXPERIENCE UPGRADE */' not in s:
+              s = s.replace('</style>', css + '\n</style>', 1)
+          p.write_text(s, encoding='utf-8')
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Add premium mobile GIS motion and snap galleries"
+          git push
