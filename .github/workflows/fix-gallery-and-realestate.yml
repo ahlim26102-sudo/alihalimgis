@@ -1,0 +1,80 @@
+name: Fix gallery and replace Layout 05
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-gallery-and-realestate.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+      - name: Patch portfolio content
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+
+          # 1) Restore the three Project gallery cards to the correct source images.
+          start = s.find("const gal=document.querySelector('#projects .gallery');")
+          end = s.find("let analytics=document.querySelector('#analytics');", start)
+          if start == -1 or end == -1:
+              raise SystemExit('Project gallery block not found')
+          gallery = '''const gal=document.querySelector('#projects .gallery');if(gal){
+            gal.innerHTML='';
+            const items=[
+              ['cad-source.jpg','CAD Source / Project Base','AutoCAD engineering drawing and GIS project base.'],
+              ['jeddah-wide.jpg','GIS Network Mapping','ArcGIS Pro stormwater and groundwater utility mapping.'],
+              ['python-automation.jpg','Utility Network & QA/QC','Python / ArcPy automation, structured GIS data processing and QA/QC workflow.']
+            ];
+            items.forEach(([img,title,desc])=>{
+              const el=document.createElement('div');el.className='tile reveal';
+              el.innerHTML='<div class="media mainMedia"><img src="'+img+'" alt="'+title+'" loading="lazy"></div><div class="body"><h3>'+title+'</h3><p>'+desc+'</p></div>';
+              gal.appendChild(el)
+            });
+          }
+          '''
+          s = s[:start] + gallery + s[end:]
+
+          # 2) Replace Stormwater Layout 05 in the Final GIS Deliverables section
+          # with the real-estate layout image, while keeping the first four stormwater sheets.
+          marker = "const pdfs=['Stormwater_Layout_01.pdf','Stormwater_Layout_02.pdf','Stormwater_Layout_03.pdf','Stormwater_Layout_04.pdf','Stormwater_Layout_05.pdf'];"
+          if marker not in s:
+              raise SystemExit('Deliverables PDF list not found')
+          replacement = "const pdfs=['Stormwater_Layout_01.pdf','Stormwater_Layout_02.pdf','Stormwater_Layout_03.pdf','Stormwater_Layout_04.pdf'];"
+          s = s.replace(marker, replacement, 1)
+
+          s = s.replace(
+              "const titles=['Stormwater Layout 01','Stormwater Layout 02','Stormwater Layout 03','Stormwater Layout 04','Stormwater Layout 05'];",
+              "const titles=['Stormwater Layout 01','Stormwater Layout 02','Stormwater Layout 03','Stormwater Layout 04','Real Estate GIS Layout'];",
+              1
+          )
+          s = s.replace(
+              "const desc=['Detailed stormwater network sheet with surveyed utility features and engineering cartography.','Urban stormwater network sheet showing connected drainage assets and pipe diameters.','Large-area stormwater mapping with network interpretation and spatial reference.','High-detail PRD / stormwater connection sheet with local utility features.','Urban drainage corridor sheet with stormwater infrastructure and cartographic delivery.'];",
+              "const desc=['Detailed stormwater network sheet with surveyed utility features and engineering cartography.','Urban stormwater network sheet showing connected drainage assets and pipe diameters.','Large-area stormwater mapping with network interpretation and spatial reference.','High-detail PRD / stormwater connection sheet with local utility features.','Authority-oriented parcel and land-use GIS layout based on structured real-estate schema.'];",
+              1
+          )
+
+          old = "const box=document.querySelector('#deliverables .layouts');if(box){box.innerHTML='';pdfs.forEach((pdf,i)=>{const el=document.createElement('article');el.className='layout reveal';el.innerHTML='<iframe class=\"layoutFrame\" loading=\"lazy\" src=\"'+pdf+'#page=1&view=FitH\" title=\"'+titles[i]+'\"></iframe><div class=\"body\"><h3>'+titles[i]+'</h3><span>'+desc[i]+'</span><div class=\"deliverableTag\">ORIGINAL PDF · UNALTERED</div><div class=\"layoutActions\"><a class=\"pdf\" href=\"'+pdf+'\" target=\"_blank\">OPEN ORIGINAL PDF ↗</a></div></div>';box.appendChild(el)})}"
+          new = "const box=document.querySelector('#deliverables .layouts');if(box){box.innerHTML='';pdfs.forEach((pdf,i)=>{const el=document.createElement('article');el.className='layout reveal';el.innerHTML='<iframe class=\"layoutFrame\" loading=\"lazy\" src=\"'+pdf+'#page=1&view=FitH\" title=\"'+titles[i]+'\"></iframe><div class=\"body\"><h3>'+titles[i]+'</h3><span>'+desc[i]+'</span><div class=\"deliverableTag\">ORIGINAL PDF · UNALTERED</div><div class=\"layoutActions\"><a class=\"pdf\" href=\"'+pdf+'\" target=\"_blank\">OPEN ORIGINAL PDF ↗</a></div></div>';box.appendChild(el)})}if(box){const el=document.createElement('article');el.className='layout reveal realestate';el.innerHTML='<div class=\"body\" style=\"padding:0\"><img class=\"realestateImg\" src=\"realestate-layout.jpg\" alt=\"Real Estate GIS Layout\" loading=\"lazy\"></div><div class=\"body\"><h3>Real Estate GIS Layout</h3><span>Authority-oriented parcel and land-use GIS layout based on structured real-estate schema.</span><div class=\"deliverableTag\">REAL ESTATE GIS · CAD → GIS SCHEMA</div></div>';box.appendChild(el)}"
+          if old not in s:
+              raise SystemExit('Deliverables render block not found')
+          s = s.replace(old, new, 1)
+
+          # 3) Remove the old extra Real Estate addon so Layout 05 is not duplicated.
+          s = s.replace("const deliver=document.querySelector('#deliverables .wrap');if(deliver&&!document.getElementById('realEstateAddon')){const addon=document.createElement('div');addon.id='realEstateAddon';addon.className='layout realestate reveal';addon.style.marginTop='13px';addon.innerHTML='<img class=\"realestateImg\" src=\"realestate-layout.jpg\" alt=\"Real Estate GIS Layout\"><div class=\"body\"><h3>Real Estate GIS Layout</h3><span>Parcel mapping, land-use classification and authority-oriented GIS schema presentation.</span><div class=\"deliverableTag\">REAL ESTATE GIS · CAD → GIS SCHEMA</div></div>';deliver.appendChild(addon)}\n", "")
+
+          p.write_text(s, encoding='utf-8')
+
+      - name: Commit patch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m 'Restore correct gallery and real estate layout'
+          git push origin HEAD:main
