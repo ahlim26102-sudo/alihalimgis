@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - '.github/workflows/site-integrity-repair.yml'
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -22,26 +23,20 @@ jobs:
 
           p = Path('index.html')
           s = p.read_text(encoding='utf-8')
-          # Cache-bust the legacy page.
-          s = s.replace("legacy.html?rev=layout-fix-01", "legacy.html?rev=site-integrity-03")
-          # Add the exact analytics images and correct titles after the legacy body is injected.
+          s = s.replace("legacy.html?rev=layout-fix-01", "legacy.html?rev=site-integrity-04")
           marker = "document.body.innerHTML=doc.body.innerHTML;"
           inject = r'''\nconst style=document.createElement('style');style.textContent=`.layoutFrame{width:100%;height:520px;border:0;display:block;background:#fff}.analyticsGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.analyticsCard img{width:100%;height:auto;display:block;object-fit:contain;background:#fff}.coord{animation:annotationFade 7s ease-in-out infinite}.c2{animation-delay:1.2s}.c3{animation-delay:2.1s}.c4{animation-delay:3s}@keyframes annotationFade{0%,18%{opacity:0}35%,58%{opacity:.72}78%,100%{opacity:0}}@media(max-width:620px){.layoutFrame{height:460px}.analyticsGrid{display:flex;overflow-x:auto;gap:10px;scroll-snap-type:x mandatory;scrollbar-width:none}.analyticsGrid::-webkit-scrollbar{display:none}.analyticsCard{min-width:86vw;scroll-snap-align:start}}`;document.head.appendChild(style);'''
           s = s.replace(marker, marker + inject, 1)
-          # Force project gallery captions to match the actual CAD / ArcGIS screenshots shown there.
           s = s.replace("<h3>Cartographic Output</h3><p>Stormwater network plan.</p>","<h3>CAD Source / Project Base</h3><p>Original engineering drawing and project reference.</p>")
           s = s.replace("<h3>Utility Mapping</h3><p>Structured network presentation.</p>","<h3>GIS Network Mapping</h3><p>ArcGIS Pro infrastructure visualization.</p>")
           s = s.replace("<h3>Technical Sheet</h3><p>Professional GIS layout.</p>","<h3>Utility Network & QA/QC</h3><p>Detailed GIS editing and quality-focused workspace.</p>")
-          # Replace/insert analytics section directly after the Projects section.
           analytics = '''<section id="analytics" class="alt"><div class="wrap reveal"><div class="head"><div><div class="num">04 · ANALYTICAL GIS</div><h2>Spatial analysis, presented clearly.</h2></div><p>Illustrative GIS demonstrations covering stormwater analysis, parcel GIS and terrain / remote sensing workflows.</p></div><div class="analyticsGrid"><article class="analyticsCard"><img src="A_premium_professional_GIS_portfolio_map_visualization_for_a.png" alt="Stormwater Analysis"><div class="body"><b>Stormwater Analysis</b><span>Drainage catchments · Flow direction · Network density · Manholes</span><small class="demo">ILLUSTRATIVE / PRESENTATION DEMONSTRATION</small></div></article><article class="analyticsCard"><img src="Premium_professional_GIS_portfolio_visualization_for_real_es.png" alt="Parcel GIS"><div class="body"><b>Parcel GIS</b><span>Parcel mapping · Land use · Road network · Data schema</span><small class="demo">ILLUSTRATIVE / PRESENTATION DEMONSTRATION</small></div></article><article class="analyticsCard"><img src="Professional_GIS_spatial_analysis_portfolio_visual_showing_a.png" alt="Terrain and Spatial Analysis"><div class="body"><b>Terrain & Spatial Analysis</b><span>DEM · Contours · Hillshade · Remote sensing</span><small class="demo">ILLUSTRATIVE / PRESENTATION DEMONSTRATION</small></div></article></div></div></section>'''
           if 'id="analytics"' in s:
               s = re.sub(r'<section[^>]+id="analytics"[^>]*>.*?</section>', analytics, s, count=1, flags=re.S)
           else:
-              needle = '<section id="deliverables"'
-              s = s.replace(needle, analytics + needle, 1)
+              s = s.replace('<section id="deliverables"', analytics + '<section id="deliverables"', 1)
           p.write_text(s, encoding='utf-8')
           PY
-          # Remove accidental placeholder files created during repair attempts.
           rm -f layout-real-01.jpg layout-real-02.tmp _replace_me.txt legacy-check.txt
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
