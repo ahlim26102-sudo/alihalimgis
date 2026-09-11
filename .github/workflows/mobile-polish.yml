@@ -1,0 +1,138 @@
+name: Premium mobile polish
+on:
+  push:
+    paths:
+      - .github/workflows/mobile-polish.yml
+permissions:
+  contents: write
+jobs:
+  polish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Improve mobile layout
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          css = r'''
+          /* PREMIUM MOBILE REBUILD */
+          @media (max-width: 680px){
+            html{font-size:16px;-webkit-text-size-adjust:100%;}
+            body{overflow-x:hidden;min-width:0;}
+            .wrap{width:calc(100% - 24px);max-width:none;margin:0 auto;}
+            header{position:sticky;top:0;height:auto;}
+            .nav{height:60px;padding:0 2px;}
+            .brand img{width:142px;height:42px;object-fit:contain;}
+            .links{display:none!important;}
+            .hero{display:block;min-height:0;padding:30px 0 34px;overflow:visible;}
+            .heroProfileMini{position:relative!important;right:auto!important;top:auto!important;left:auto!important;margin:0 auto 18px!important;width:100%!important;max-width:none!important;transform:none!important;padding:10px 12px!important;gap:10px!important;border-radius:17px!important;}
+            .heroProfilePhoto{width:62px!important;height:62px!important;flex:0 0 62px!important;border-radius:15px!important;}
+            .heroProfileMini span{font-size:7px!important;letter-spacing:.13em!important;}
+            .heroProfileMini strong{font-size:17px!important;line-height:1.1!important;}
+            .heroProfileMini b{font-size:9px!important;}
+            .heroProfileMini small{font-size:8px!important;line-height:1.35!important;}
+            .heroGrid{display:flex!important;flex-direction:column!important;gap:20px!important;}
+            .heroGrid>div:first-child{width:100%;}
+            .hero h1{font-size:clamp(54px,17vw,76px)!important;line-height:.86!important;margin:10px 0 15px!important;white-space:nowrap;}
+            .ey{font-size:8px!important;letter-spacing:.16em!important;}
+            .headline{font-size:20px!important;line-height:1.3!important;max-width:none!important;}
+            .lead{font-size:13px!important;line-height:1.7!important;max-width:none!important;}
+            .chips{gap:6px!important;margin:15px 0!important;}
+            .chip{font-size:8px!important;padding:6px 8px!important;}
+            .actions{display:grid!important;grid-template-columns:1fr 1fr!important;gap:8px!important;}
+            .actions .btn{width:100%!important;margin:0!important;justify-content:center!important;font-size:10px!important;padding:11px 7px!important;}
+            .stats{grid-template-columns:1fr 1fr!important;gap:7px!important;margin-top:18px!important;}
+            .stat{padding:11px!important;min-height:68px;}
+            .stat b{font-size:19px!important;}
+            .stat span{font-size:8px!important;line-height:1.35!important;}
+            .globeBox{width:100%!important;min-height:300px!important;height:300px!important;border-radius:22px!important;order:2;}
+            .globe{width:175px!important;height:175px!important;top:46%!important;}
+            .orb{width:235px!important;height:66px!important;}
+            .orb2{width:275px!important;height:88px!important;}
+            .coord{font-size:7px!important;}
+            .globeLabel{font-size:8px!important;left:14px!important;bottom:13px!important;}
+            section{padding:46px 0!important;}
+            .head{display:block!important;margin-bottom:18px!important;}
+            .head h2{font-size:28px!important;line-height:1.12!important;margin:5px 0 10px!important;}
+            .head p{font-size:11px!important;line-height:1.65!important;max-width:none!important;}
+            .grid2,.market,.case,.automation,.edu,.signalBoard{grid-template-columns:1fr!important;display:grid!important;gap:12px!important;}
+            .card{padding:15px!important;border-radius:17px!important;}
+            .card h3{font-size:18px!important;}
+            .card p{font-size:11px!important;line-height:1.65!important;}
+            .workflow{grid-template-columns:repeat(2,1fr)!important;gap:7px!important;}
+            .step{padding:10px!important;}
+            .step b{font-size:9px!important;}
+            .step small{font-size:8px!important;}
+            .matrix{grid-template-columns:1fr!important;}
+            .matrix .cell.h{display:none!important;}
+            .services,.gallery,.layouts{grid-template-columns:1fr!important;gap:11px!important;}
+            .service{min-height:0!important;}
+            .service h3{font-size:16px!important;}
+            .service p{font-size:11px!important;}
+            .tile img{aspect-ratio:16/10!important;}
+            .tile .body{padding:12px!important;}
+            .tile h3{font-size:16px!important;}
+            .tile p{font-size:10px!important;}
+            .case .heroMedia{aspect-ratio:16/10!important;}
+            .sideMedia{aspect-ratio:16/10!important;}
+            .layouts{grid-template-columns:1fr!important;}
+            .layout{min-width:0!important;}
+            .pdfPreview{height:270px!important;display:block!important;}
+            .pdfLink{font-size:10px!important;padding:5px 0;}
+            .automation img{object-fit:contain!important;object-position:center!important;}
+            .autoMedia{aspect-ratio:16/10!important;}
+            .stack{grid-template-columns:1fr 1fr!important;gap:7px!important;}
+            .tech{padding:11px!important;}
+            .tech b{font-size:10px!important;}.tech span{font-size:8px!important;}
+            .timeline{padding:17px 14px 5px 31px!important;border-radius:18px!important;}
+            .timeline:before{left:7px!important;}
+            .job{margin-bottom:18px!important;}
+            .job:before{left:-27px!important;width:8px!important;height:8px!important;}
+            .job h4{font-size:12px!important;line-height:1.35!important;}
+            .job p{font-size:9px!important;line-height:1.5!important;}
+            .date{font-size:8px!important;}
+            .conf{display:flex!important;align-items:flex-start!important;padding:18px!important;border-radius:18px!important;}
+            .conf h3{font-size:17px!important;}
+            .conf p{font-size:10px!important;}
+            .contact{grid-template-columns:1fr!important;gap:9px!important;}
+            .contactCard{grid-template-columns:44px 1fr auto!important;gap:10px!important;padding:13px!important;border-radius:14px!important;}
+            .contactIcon{width:44px!important;height:44px!important;border-radius:12px!important;}
+            .contactIcon svg{width:21px!important;height:21px!important;}
+            .contactCard .label{font-size:8px!important;}
+            .contactCard b{font-size:12px!important;}
+            .contactCard span{font-size:8px!important;}
+            .contactArrow{font-size:15px!important;}
+            .premiumBanner{grid-template-columns:1fr!important;gap:10px!important;}
+            .premiumTile{padding:15px!important;}
+            #motion .earth{display:none!important;}
+            #motion .ring{display:none!important;}
+            #motion .beam{display:none!important;}
+            #motion .dot{display:none!important;}
+            footer{font-size:8px!important;text-align:center!important;line-height:1.55!important;padding:24px 0 35px!important;}
+            .modal{padding:8px!important;}
+            .modalbox{width:100%!important;border-radius:13px!important;}
+            .modalbox img{max-height:78vh!important;}
+          }
+          @media (max-width:390px){
+            .wrap{width:calc(100% - 18px)!important;}
+            .hero h1{font-size:50px!important;}
+            .actions{grid-template-columns:1fr!important;}
+            .stats{grid-template-columns:1fr!important;}
+            .globeBox{height:270px!important;min-height:270px!important;}
+            .globe{width:155px!important;height:155px!important;}
+            .orb{width:210px!important;}.orb2{width:245px!important;}
+          }
+          '''
+          if '/* PREMIUM MOBILE REBUILD */' not in s:
+              s = s.replace('</style>', css + '\n</style>', 1)
+          p.write_text(s, encoding='utf-8')
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Rebuild mobile responsive layout"
+          git push
