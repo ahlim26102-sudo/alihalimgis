@@ -1,0 +1,37 @@
+name: Add visible hero photo card
+on:
+  push:
+    paths:
+      - .github/workflows/add-hero-photo-card.yml
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Place portrait visibly in hero
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+          p=Path('index.html')
+          s=p.read_text(encoding='utf-8')
+          s=s.replace('https://raw.githubusercontent.com/ahlim26102-sudo/alihalimgis/main/ali-halim-portrait-original-cutout.png','ali-halim-portrait-original-cutout.png')
+          s=re.sub(r'<div class="heroProfileMini">.*?</div></div>', '', s, flags=re.S)
+          card='''<div class="heroProfileMini"><div class="heroProfilePhoto"><img src="ali-halim-portrait-original-cutout.png" alt="Ali Halim"></div><div><span>PROFESSIONAL PROFILE</span><strong>ALI HALIM</strong><b>GIS SPECIALIST</b><small>Utility GIS · CAD → GIS · Automation</small></div></div>'''
+          marker='<section class="hero">'
+          if marker in s:
+              s=s.replace(marker, marker+card, 1)
+          css='''<style id="hero-photo-card">.hero{position:relative}.heroProfileMini{position:absolute;right:5vw;top:94px;z-index:90;display:flex;align-items:center;gap:12px;padding:10px 16px 10px 10px;border:1px solid rgba(232,198,111,.72);border-radius:20px;background:rgba(4,16,23,.94);box-shadow:0 18px 48px rgba(0,0,0,.42);backdrop-filter:blur(16px)}.heroProfilePhoto{width:76px;height:76px;flex:0 0 76px;border-radius:18px;overflow:hidden;border:1px solid rgba(232,198,111,.8);background:#07161e;display:flex;align-items:flex-end;justify-content:center}.heroProfilePhoto img{height:100%;width:auto;max-width:none;object-fit:contain;display:block}.heroProfileMini>div:last-child{display:flex;flex-direction:column;line-height:1.18}.heroProfileMini span{font-size:8px;letter-spacing:.18em;color:#e8c66f;font-weight:950}.heroProfileMini strong{font-size:18px;margin-top:2px}.heroProfileMini b{font-size:9px;color:#e8c66f;letter-spacing:.13em;margin-top:2px}.heroProfileMini small{font-size:9px;color:#9eb5bf;margin-top:4px}@media(max-width:1050px){.heroProfileMini{right:3vw;top:84px}}@media(max-width:680px){.heroProfileMini{position:relative;right:auto;top:auto;width:max-content;max-width:calc(100% - 28px);margin:-15px auto 20px;transform:none}.heroProfilePhoto{width:62px;height:62px;flex-basis:62px}.heroProfileMini strong{font-size:16px}.heroProfileMini small{font-size:8px}}</style>'''
+          if 'id="hero-photo-card"' not in s:
+              s=s.replace('</head>',css+'</head>',1)
+          p.write_text(s,encoding='utf-8')
+      - name: Commit changes
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git diff --cached --quiet && exit 0
+          git commit -m "Make hero portrait card visible"
+          git push
