@@ -1,4 +1,4 @@
-/* ALI HALIM Portfolio Lightbox v2 */
+/* ALI HALIM Portfolio Lightbox v2.1 */
 (function(){
   'use strict';
   if (window.__ALI_HALIM_LIGHTBOX__) return;
@@ -43,9 +43,7 @@
   }
 
   function markImages(){
-    document.querySelectorAll('img').forEach(img=>{
-      if (isEligible(img)) img.classList.add('lightboxTarget');
-    });
+    document.querySelectorAll('img').forEach(img=>{ if (isEligible(img)) img.classList.add('lightboxTarget'); });
   }
 
   function open(img){
