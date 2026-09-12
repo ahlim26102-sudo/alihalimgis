@@ -1,4 +1,4 @@
-/* ALI HALIM Portfolio Lightbox v1 */
+/* ALI HALIM Portfolio Lightbox v2 */
 (function(){
   'use strict';
   if (window.__ALI_HALIM_LIGHTBOX__) return;
@@ -6,19 +6,22 @@
 
   const style = document.createElement('style');
   style.textContent = `
-    .gisLightbox{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(2,10,14,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease;touch-action:none}
+    .gisLightbox{position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(2,10,14,.90);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease;touch-action:none}
     .gisLightbox.open{opacity:1;visibility:visible}
-    .gisLightbox img{max-width:94vw;max-height:90vh;width:auto;height:auto;object-fit:contain;border-radius:12px;box-shadow:0 24px 80px rgba(0,0,0,.6);transform:scale(.94);transition:transform .22s ease;cursor:zoom-out;background:#fff}
+    .gisLightbox img{display:block;max-width:94vw;max-height:90vh;width:auto;height:auto;object-fit:contain;border-radius:14px;box-shadow:0 24px 80px rgba(0,0,0,.65);transform:scale(.94);transition:transform .22s ease;cursor:zoom-in;background:#fff}
     .gisLightbox.open img{transform:scale(1)}
-    .gisLightboxClose{position:absolute;top:14px;right:14px;width:44px;height:44px;border:1px solid rgba(255,255,255,.2);border-radius:50%;background:rgba(5,20,27,.8);color:#fff;font-size:27px;line-height:1;display:grid;place-items:center;cursor:pointer;z-index:2}
-    .gisLightboxHint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);font:700 10px/1 ui-monospace,Consolas,monospace;letter-spacing:.1em;color:rgba(220,240,242,.55);white-space:nowrap;pointer-events:none}
-    .lightboxTarget{cursor:zoom-in}
     .gisLightbox.open img.zoomed{max-width:none;max-height:none;cursor:move;transform:scale(1.65);transition:none}
+    .gisLightboxClose{position:absolute;top:14px;right:14px;width:44px;height:44px;border:1px solid rgba(255,255,255,.25);border-radius:50%;background:rgba(5,20,27,.86);color:#fff;font-size:27px;line-height:1;display:grid;place-items:center;cursor:pointer;z-index:2}
+    .gisLightboxHint{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);font:700 10px/1 ui-monospace,Consolas,monospace;letter-spacing:.1em;color:rgba(220,240,242,.60);white-space:nowrap;pointer-events:none}
+    .lightboxTarget{cursor:zoom-in!important}
+    .photo.lightboxTarget{position:relative}
+    .photo.lightboxTarget:after{content:"TAP TO VIEW";position:absolute;left:50%;bottom:5px;transform:translateX(-50%);padding:4px 7px;border:1px solid rgba(233,198,111,.5);border-radius:999px;background:rgba(3,14,19,.78);color:#e9c66f;font:800 7px/1 ui-monospace,Consolas,monospace;letter-spacing:.08em;pointer-events:none;white-space:nowrap;opacity:.9}
     @media(max-width:680px){
-      .gisLightbox{padding:12px}
-      .gisLightbox img{max-width:96vw;max-height:84vh;border-radius:10px}
+      .gisLightbox{padding:10px}
+      .gisLightbox img{max-width:96vw;max-height:84vh;border-radius:12px}
       .gisLightboxClose{top:10px;right:10px;width:40px;height:40px;font-size:24px}
       .gisLightboxHint{font-size:8px;bottom:12px}
+      .photo.lightboxTarget:after{font-size:6px;bottom:4px}
     }
   `;
   document.head.appendChild(style);
@@ -36,7 +39,7 @@
     if (img.closest('.gisAnnotation')) return false;
     if (img.classList.contains('logo')) return false;
     if (img.naturalWidth < 120 || img.naturalHeight < 80) return false;
-    return !!img.closest('.media,.tile,.layout,.analyticsCard,.toolShot,.project,.gallery,.layouts,#analytics,#projects');
+    return !!img.closest('.photo,.media,.tile,.layout,.analyticsCard,.toolShot,.project,.gallery,.layouts,#analytics,#projects');
   }
 
   function markImages(){
@@ -63,13 +66,9 @@
 
   document.addEventListener('click', function(e){
     const img = e.target.closest('img.lightboxTarget');
-    if (img){ e.preventDefault(); open(img); return; }
-    if (e.target === overlay || e.target === viewerImg) {
-      if (e.target === viewerImg) viewerImg.classList.toggle('zoomed');
-      else close();
-      return;
-    }
-    if (e.target === closeBtn) close();
+    if (img){ e.preventDefault(); e.stopPropagation(); open(img); return; }
+    if (e.target === viewerImg) { viewerImg.classList.toggle('zoomed'); return; }
+    if (e.target === overlay || e.target === closeBtn) { close(); return; }
   }, true);
 
   document.addEventListener('keydown', function(e){
