@@ -1,0 +1,37 @@
+name: Install GIS image lightbox
+on:
+  push:
+    paths:
+      - 'lightbox.js'
+permissions:
+  contents: write
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load lightbox in legacy page
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('legacy.html')
+          s = p.read_text(encoding='utf-8')
+          tag = '<script src="lightbox.js?v=1" defer></script>'
+          if tag not in s:
+              if '</body>' not in s:
+                  raise SystemExit('legacy.html has no body close tag')
+              s = s.replace('</body>', tag + '</body>', 1)
+              p.write_text(s, encoding='utf-8')
+              print('Lightbox installed.')
+          else:
+              print('Lightbox already installed.')
+      - name: Commit and remove installer
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add legacy.html
+          git commit -m 'Enable click-to-expand GIS images' || true
+          git rm .github/workflows/install-lightbox.yml || true
+          git commit -m 'Remove one-time lightbox installer' || true
+          git push origin HEAD:main
