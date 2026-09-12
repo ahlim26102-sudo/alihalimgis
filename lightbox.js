@@ -35,7 +35,6 @@
     if (!img || !img.src) return false;
     if (img.closest('.gisAnnotation')) return false;
     if (img.classList.contains('logo')) return false;
-    if (img.closest('.photo')) return false;
     if (img.naturalWidth < 120 || img.naturalHeight < 80) return false;
     return !!img.closest('.media,.tile,.layout,.analyticsCard,.toolShot,.project,.gallery,.layouts,#analytics,#projects');
   }

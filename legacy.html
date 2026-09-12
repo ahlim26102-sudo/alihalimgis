@@ -43,6 +43,13 @@ body>header,body>main,body>footer{position:relative;z-index:2}
 @media(max-width:680px){.gisAnnotation{opacity:.72!important}.gisAnnotation text{font-size:10px}.gisAnnotation .routes{opacity:.9}.gisAnnotation .bigRing{stroke-width:1.4}}
 @media(prefers-reduced-motion:reduce){.gisAnnotation *{animation:none!important}}
 
+
+/* PROFILE PORTRAIT LIGHTBOX V1 */
+.photo{cursor:zoom-in;position:relative}
+.photo:after{content:"VIEW PROFILE";position:absolute;left:50%;bottom:6px;transform:translateX(-50%);padding:3px 6px;border:1px solid rgba(233,198,111,.45);border-radius:999px;background:rgba(3,14,19,.72);color:#e9c66f;font:800 7px/1 ui-monospace,Consolas,monospace;letter-spacing:.08em;opacity:0;transition:.22s;pointer-events:none;white-space:nowrap}
+.photo:hover:after,.photo:focus-within:after{opacity:1}
+@media(max-width:680px){.photo:after{opacity:.85;font-size:6px}}
+
 </style></head>
 <body>
 <div class="gisAnnotation" aria-hidden="true">
