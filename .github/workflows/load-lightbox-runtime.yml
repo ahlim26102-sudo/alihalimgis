@@ -1,0 +1,35 @@
+name: Load portrait lightbox at runtime
+on:
+  push:
+    paths:
+      - 'lightbox.js'
+permissions:
+  contents: write
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Load lightbox after legacy injection
+        shell: python
+        run: |
+          from pathlib import Path
+          p = Path('index.html')
+          s = p.read_text(encoding='utf-8')
+          marker = 'document.body.innerHTML=doc.body.innerHTML;'
+          inject = "document.body.innerHTML=doc.body.innerHTML;\nconst lb=document.createElement('script');lb.src='lightbox.js?v=2';lb.defer=true;document.body.appendChild(lb);"
+          if marker not in s:
+              raise SystemExit('index injection marker not found')
+          if "lb.src='lightbox.js?v=2'" not in s:
+              s = s.replace(marker, inject, 1)
+              p.write_text(s, encoding='utf-8')
+      - name: Commit and remove workflow
+        shell: bash
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add index.html
+          git commit -m 'Load image lightbox after portfolio bootstrap' || true
+          git rm .github/workflows/load-lightbox-runtime.yml || true
+          git commit -m 'Remove one-time lightbox runtime installer' || true
+          git push origin HEAD:main
